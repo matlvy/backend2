@@ -1,22 +1,36 @@
 import express from "express";
-import mongoose from "mongoose";
-import routes from "./routes/index.routes.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const PORT = 5000;
 
 // Express Config
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+//app.use(cookieParser());
+app.use(cookieParser("cod3rs3cr3t"));
 
-//Mongoose Config
-mongoose
-  .connect("mongodb://localhost:27017/backend2_0")
-  .then(() => console.log("mongodb connected"))
-  .catch((error) => console.log(error));
+//CRUD Cookies
+app.get("/set-cookie", (req, res) => {
+  res.cookie("coderCookie", "Mi Nueva Cookie", {
+    maxAge: 100000,
+  });
+  res.json({ message: "Cookie set" });
+});
+app.get("/set-signed-cookie", (req, res) => {
+  res.cookie("signedCookie", "my signed cookie", {
+    maxAge: 100000,
+    signed: true,
+  });
+  res.json({ message: "signed cookie set" });
+});
+app.get("/get-cookies", (req, res) => {
+  res.json({ cookies: req.cookies, signed: req.signedCookies });
+});
+app.get("/delete-cookie", (req, res) => {
+  res.clearCookie("coderCookie");
+  res.json({ message: "cookie deleted" });
+});
 
-//Routes Config
-app.use("/api", routes);
+//Start Server
 app.listen(PORT, () => {
   console.log(`server running on port ${PORT}`);
 });
