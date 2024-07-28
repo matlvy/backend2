@@ -1,51 +1,54 @@
 import express from "express";
-import session from "express-session";
+import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
-import FileStore from "session-file-store";
 import MongoStore from "connect-mongo";
-
-const fileStorage = FileStore(session);
+import session from "express-session";
+import handlebars from "express-handlebars";
+import path from "path";
+import __dirname from "./dirname.js";
+import viewsRoutes from "./routes/views.routes.js";
+import sessionRoutes from "./routes/session.routes.js";
 
 const app = express();
 const PORT = 5000;
 
 // Express Config
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-/*
-Session con FileStore
-app.use(
-  session({
-    store: new fileStorage({ path: "./sessions", ttl: 10000 }),
-    secret: "s3cr3t",
-    resave: false,
-    saveUninitialized: false,
-  })
-);
-*/
+
 //Session con MongoStore
 app.use(
   session({
-    store: new MongoStore({
-      mongoUrl: "mongodb://localhost:27017/backend2_2_1",
-      ttl: 20,
-    }),
     secret: "s3cr3t",
     resave: false,
     saveUninitialized: false,
+    store: new MongoStore({
+      mongoUrl: "mongodb://localhost:27017/backend2_2_2",
+      ttl: 60,
+    }),
   })
 );
+//Mongoose Config
+mongoose
+  .connect("mongodb://localhost:27017/backend2_2_2")
+  .then(() => console.log("MongoDB connected"))
+  .catch((error) => console.log(error));
 
-//Routes
-app.get("/session", (req, res) => {
-  console.log(req.session);
-  if (req.session.counter) {
-    req.session.counter++;
-    res.send(`visitas: ${req.session.counter}`);
-  } else {
-    req.session.counter = 1;
-    res.send(`welcome`);
-  }
-});
+//Handlebars Config
+app.engine(
+  "hbs",
+  handlebars.engine({
+    extname: "hbs",
+    defaultLayout: "main",
+  })
+);
+app.set("view engine", "hbs");
+app.set("views", path.join(__dirname, "views"));
+
+//Routes Config
+app.use("/", viewsRoutes);
+app.use("/api/sessions", sessionRoutes);
 
 //Start Server
 app.listen(PORT, () => {
