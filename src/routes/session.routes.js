@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { userModel } from "../models/user.model.js";
+import { createHash, verifyPassword } from "../utils/hashFunctions.js";
 
 const router = Router();
 
@@ -17,8 +18,12 @@ router.post("/login", async (req, res) => {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    if (user.password !== password) {
-      return res.status(401).json({ message: "Contraseña incorrecta" });
+    //if (user.password !== password) {
+    //return res.status(401).json({ message: "Contraseña incorrecta" })}
+
+    const isPasswordCorrect = await verifyPassword(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(401).json({ message: "contrasena incorrecta" });
     }
 
     req.session.user = {
@@ -45,12 +50,13 @@ router.post("/register", async (req, res) => {
   }
 
   try {
+    const hashPassword = await createHash(password);
     const user = await userModel.create({
       first_name,
       last_name,
       email,
       age,
-      password,
+      password: hashPassword,
     });
 
     // return res.status(201).json({ message: "Usuario creado", user });

@@ -24,14 +24,14 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: new MongoStore({
-      mongoUrl: "mongodb://localhost:27017/backend2_2_2",
+      mongoUrl: "mongodb://localhost:27017/backend2_3",
       ttl: 60,
     }),
   })
 );
 //Mongoose Config
 mongoose
-  .connect("mongodb://localhost:27017/backend2_2_2")
+  .connect("mongodb://localhost:27017/backend2_3")
   .then(() => console.log("MongoDB connected"))
   .catch((error) => console.log(error));
 
