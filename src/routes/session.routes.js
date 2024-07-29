@@ -68,6 +68,39 @@ router.post("/register", async (req, res) => {
   }
 });
 
+router.post("/restore-password", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Todos los campos son requeridos" });
+  }
+
+  try {
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const hashPassword = await createHash(password);
+
+    await userModel.findOneAndUpdate(
+      {
+        email: user.email,
+      },
+      {
+        password: hashPassword,
+      }
+    );
+
+    res.redirect("/login");
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Hubo un error", details: error.message });
+  }
+});
+
 router.get("/logout", (req, res) => {
   req.session.destroy();
   res.redirect("/");
