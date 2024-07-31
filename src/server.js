@@ -8,34 +8,41 @@ import path from "path";
 import __dirname from "./dirname.js";
 import viewsRoutes from "./routes/views.routes.js";
 import sessionRoutes from "./routes/session.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import { initializePassport } from "./config/passport.config.js";
+import passport from "passport";
 
 const app = express();
 const PORT = 5000;
 
-// Express Config
+// Express config
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
-//Session con MongoStore
 app.use(
   session({
     secret: "s3cr3t",
     resave: false,
     saveUninitialized: false,
     store: new MongoStore({
-      mongoUrl: "mongodb://localhost:27017/backend2_3",
+      mongoUrl: "mongodb://localhost:27017/clase_3",
       ttl: 60,
     }),
   })
 );
-//Mongoose Config
+
+// Mongoose Config
 mongoose
-  .connect("mongodb://localhost:27017/backend2_3")
+  .connect("mongodb://localhost:27017/clase_3")
   .then(() => console.log("MongoDB connected"))
   .catch((error) => console.log(error));
 
-//Handlebars Config
+// Passport Config
+initializePassport();
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Handlebars Config
 app.engine(
   "hbs",
   handlebars.engine({
@@ -46,11 +53,12 @@ app.engine(
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "views"));
 
-//Routes Config
-app.use("/", viewsRoutes);
+// Routes config
 app.use("/api/sessions", sessionRoutes);
+app.use("/api/users", userRoutes);
+app.use("/", viewsRoutes);
 
-//Start Server
+// Start server
 app.listen(PORT, () => {
-  console.log(`server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
