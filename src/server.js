@@ -1,14 +1,13 @@
 import express from "express";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
-import MongoStore from "connect-mongo";
+// import MongoStore from "connect-mongo";
 import session from "express-session";
 import handlebars from "express-handlebars";
 import path from "path";
 import __dirname from "./dirname.js";
 import viewsRoutes from "./routes/views.routes.js";
 import sessionRoutes from "./routes/session.routes.js";
-import userRoutes from "./routes/user.routes.js";
 import { initializePassport } from "./config/passport.config.js";
 import passport from "passport";
 
@@ -24,10 +23,6 @@ app.use(
     secret: "s3cr3t",
     resave: false,
     saveUninitialized: false,
-    store: new MongoStore({
-      mongoUrl: "mongodb://localhost:27017/clase_3",
-      ttl: 60,
-    }),
   })
 );
 
@@ -40,7 +35,6 @@ mongoose
 // Passport Config
 initializePassport();
 app.use(passport.initialize());
-app.use(passport.session());
 
 // Handlebars Config
 app.engine(
@@ -55,7 +49,6 @@ app.set("views", path.join(__dirname, "views"));
 
 // Routes config
 app.use("/api/sessions", sessionRoutes);
-app.use("/api/users", userRoutes);
 app.use("/", viewsRoutes);
 
 // Start server

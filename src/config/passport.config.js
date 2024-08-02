@@ -1,79 +1,41 @@
 import passport from "passport";
-import localStrategy from "passport-local";
+import GithubStrategy from "passport-github2";
 import { userModel } from "../models/user.model.js";
-import { createHash, verifyPassword } from "../utils/hashFunctions.js";
 
-const LocalStrategy = localStrategy.Strategy;
-
-export function initializePassport() {
+export const initializePassport = () => {
   passport.use(
-    "register",
-    new LocalStrategy(
+    "github",
+    new GithubStrategy(
       {
-        usernameField: "email",
-        passReqToCallback: true,
+        clientID: "COMPLETAR",
+        clientSecret: "COMPLETAR",
+        callbackURL: "http://localhost:5000/api/sessions/githubcallback",
+        scope: ["user:email"],
       },
-      async (req, email, password, done) => {
+      async (access_token, refresh_token, profile, done) => {
         try {
-          const { first_name, last_name, age } = req.body;
+          console.log(profile);
 
-          if (!first_name || !last_name || !age) {
-            return done(null, false, {
-              message: "Todos los campos son requeridos",
-            });
-          }
+          const email = profile.emails[0].value;
 
-          const userExists = await userModel.findOne({ email });
-
-          if (userExists) {
-            return done(null, false, { message: "El usuario ya existe" });
-          }
-
-          const hashPassword = await createHash(password);
-
-          const user = await userModel.create({
-            first_name,
-            last_name,
+          const user = await userModel.findOne({
             email,
-            age,
-            password: hashPassword,
           });
 
-          return done(null, user);
-        } catch (error) {
-          return done(`Hubo un error: ${error.message}`);
-        }
-      }
-    )
-  );
-
-  passport.use(
-    "login",
-    new LocalStrategy(
-      {
-        usernameField: "email",
-      },
-      async (email, password, done) => {
-        try {
-          const user = await userModel.findOne({ email });
-
-          if (!user) {
-            return done(null, false, { message: "Usuario no encontrado" });
+          if (user) {
+            return done(null, user);
           }
 
-          const isPasswordCorrect = await verifyPassword(
-            password,
-            user.password
-          );
+          const newUser = await userModel.create({
+            name: profile.displayName,
+            email,
+            age: profile.agle || 0,
+            githubId: profile.id,
+          });
 
-          if (!isPasswordCorrect) {
-            return done(null, false, { message: "Contraseña incorrecta" });
-          }
-
-          return done(null, user);
+          return done(null, newUser);
         } catch (error) {
-          console.log(error);
-          return done(`Hubo un error: ${error.message}`);
+          return done(error);
         }
       }
     )
@@ -92,4 +54,4 @@ export function initializePassport() {
       return done(`Hubo un error: ${error.message}`);
     }
   });
-}
+};
