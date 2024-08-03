@@ -1,64 +1,84 @@
 import express from "express";
-import mongoose from "mongoose";
-import cookieParser from "cookie-parser";
-import MongoStore from "connect-mongo";
-import session from "express-session";
-import handlebars from "express-handlebars";
-import path from "path";
-import __dirname from "./dirname.js";
-import viewsRoutes from "./routes/views.routes.js";
-import sessionRoutes from "./routes/session.routes.js";
-import userRoutes from "./routes/user.routes.js";
-import { initializePassport } from "./config/passport.config.js";
-import passport from "passport";
+import { authenticate, generateToken, verifyToken } from "./utils.js";
 
 const app = express();
 const PORT = 5000;
 
+const users = [];
+
 // Express config
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use(
-  session({
-    secret: "s3cr3t",
-    resave: false,
-    saveUninitialized: false,
-    store: new MongoStore({
-      mongoUrl: "mongodb://localhost:27017/clase_3",
-      ttl: 60,
-    }),
-  })
-);
 
-// Mongoose Config
-mongoose
-  .connect("mongodb://localhost:27017/clase_3")
-  .then(() => console.log("MongoDB connected"))
-  .catch((error) => console.log(error));
+// Routes
+app.post("/register", (req, res) => {
+  const { name, email, password } = req.body;
 
-// Passport Config
-initializePassport();
-app.use(passport.initialize());
-app.use(passport.session());
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      error: "Falta información",
+    });
+  }
 
-// Handlebars Config
-app.engine(
-  "hbs",
-  handlebars.engine({
-    extname: "hbs",
-    defaultLayout: "main",
-  })
-);
-app.set("view engine", "hbs");
-app.set("views", path.join(__dirname, "views"));
+  const user = {
+    name,
+    email,
+    password,
+  };
 
-// Routes config
-app.use("/api/sessions", sessionRoutes);
-app.use("/api/users", userRoutes);
-app.use("/", viewsRoutes);
+  users.push(user);
 
-// Start server
+  res.json(user);
+});
+
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      error: "Falta información",
+    });
+  }
+
+  const user = users.find((user) => user.email === email);
+
+  if (!user) {
+    return res.status(401).json({
+      error: "Usuario no encontrado",
+    });
+  }
+
+  if (user.password !== password) {
+    return res.status(401).json({
+      error: "Contraseña incorrecta",
+    });
+  }
+
+  const payload = {
+    email: user.email,
+    name: user.name,
+  };
+  const token = generateToken(payload);
+
+  res.json({
+    token,
+    message: "Login exitoso",
+  });
+});
+
+app.get("/profile", authenticate, (req, res) => {
+  const user = users.find((user) => user.email === req.user.email);
+
+  if (!user) {
+    return res.status(401).json({
+      error: "Usuario no encontrado",
+    });
+  }
+
+  res.json(user);
+});
+
+// Listen
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
