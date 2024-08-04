@@ -3,6 +3,8 @@ import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import passport from "passport";
 import { initializePassport } from "./config/passport.config.js";
+import { passportCall } from "./middleware/passport.middleware.js";
+import userRoutes from "./routes/user.routes.js";
 
 const app = express();
 const PORT = 5000;
@@ -17,9 +19,10 @@ app.use(passport.initialize());
 
 // Routes
 app.post("/login", (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
+  console.log(role);
 
-  if (!email || !password) {
+  if (!email || !password || !role) {
     return res.status(400).json({
       error: "Falta información",
     });
@@ -33,6 +36,7 @@ app.post("/login", (req, res) => {
 
   const payload = {
     email,
+    role,
   };
 
   const token = jwt.sign(payload, "s3cr3t", {
@@ -47,13 +51,11 @@ app.post("/login", (req, res) => {
   res.json({ message: "Login exitoso" });
 });
 
-app.get(
-  "/current",
-  passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    res.json({ message: "Usuario logueado", user: req.user });
-  }
-);
+app.get("/current", passportCall("jwt"), (req, res) => {
+  res.json({ message: "Usuario logueado", user: req.user });
+});
+
+app.use("/users", passportCall("jwt"), userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
