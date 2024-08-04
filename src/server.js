@@ -1,9 +1,6 @@
 import express from "express";
-import indexRoutes from "./routes/index.routes.js";
-import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
-import handlebars from "express-handlebars";
-import viewsRoutes from "./routes/views.routes.js";
+import jwt from "jsonwebtoken";
 
 const app = express();
 const PORT = 5000;
@@ -12,26 +9,41 @@ const PORT = 5000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(express.static("public"));
 
-// Handlebars config
-app.engine(
-  "hbs",
-  handlebars.engine({ extname: ".hbs", defaultLayout: "main" })
-);
-app.set("view engine", "hbs");
-app.set("views", "./src/views");
+//Routes
+app.post("login", (req, res) => {
+  const { email, password } = req.body;
 
-// Mongoose config
-mongoose
-  .connect("mongodb://localhost:27017/practica_integradora")
-  .then(() => console.log("MongoDB connected"))
-  .catch((error) => console.log(error));
+  if (!email || !password) {
+    return res.status(400).json({
+      error: "falta informacion",
+    });
+  }
+  if (email !== "admin@example.com" || password != "1234") {
+    return res.status(401).json({
+      error: "usuario o contrasena incorrecto",
+    });
+  }
+  const payload = {
+    email,
+  };
+  const token = jwt.sign(payload, "s3cr3t", {
+    expiresIn: "2m",
+  });
+  res.cookie("token", token, {
+    maxAge: 100000,
+  });
+  res.json({ message: "login exitoso" });
+});
+app.get("/current", (req, res) => {
+  if (req.cookies.token) {
+    res.json({ message: "Usuario logueado", token: req.cookies.token });
+  } else {
+    res.json({ message: "Usuario no logueado" });
+  }
+});
 
-// Routes config
-app.use("/api", indexRoutes);
-app.use("/", viewsRoutes);
-
-// Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
