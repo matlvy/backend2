@@ -1,10 +1,10 @@
 import express from "express";
-import cookieParser from "cookie-parser";
-import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+import morgan from "morgan";
 import passport from "passport";
+import authRoutes from "./routes/auth.routes.js";
+import cookieParser from "cookie-parser";
 import { initializePassport } from "./config/passport.config.js";
-import { passportCall } from "./middleware/passport.middleware.js";
-import userRoutes from "./routes/user.routes.js";
 
 const app = express();
 const PORT = 5000;
@@ -12,51 +12,23 @@ const PORT = 5000;
 // Express config
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
+app.use(morgan("dev"));
 app.use(cookieParser());
+
+// Passport Config
 initializePassport();
 app.use(passport.initialize());
 
-// Routes
-app.post("/login", (req, res) => {
-  const { email, password, role } = req.body;
-  console.log(role);
+// Mongoose Config
+mongoose
+  .connect("mongodb://localhost:27017/after_class_2")
+  .then(() => console.log("MongoDB connected"))
+  .catch((error) => console.log(error));
 
-  if (!email || !password || !role) {
-    return res.status(400).json({
-      error: "Falta información",
-    });
-  }
+// Routes config
+app.use("/api/auth", authRoutes);
 
-  if (email !== "admin@example.com" || password !== "1234") {
-    return res.status(401).json({
-      error: "Usuario o contraseña incorrecto",
-    });
-  }
-
-  const payload = {
-    email,
-    role,
-  };
-
-  const token = jwt.sign(payload, "s3cr3t", {
-    expiresIn: "2m",
-  });
-
-  res.cookie("token", token, {
-    maxAge: 100000,
-    httpOnly: true,
-  });
-
-  res.json({ message: "Login exitoso" });
-});
-
-app.get("/current", passportCall("jwt"), (req, res) => {
-  res.json({ message: "Usuario logueado", user: req.user });
-});
-
-app.use("/users", passportCall("jwt"), userRoutes);
-
+// Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
