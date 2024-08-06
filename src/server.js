@@ -17,8 +17,19 @@ const PORT = 5000;
 // Express config
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static("./src/public"));
 app.use(morgan("dev"));
 app.use(cookieParser());
+
+//Handlebars
+app.engine("handlebars", exphbs.engine());
+app.set("view engine", "handlebars");
+app.set("views", "./src/views");
+
+//Rutas:
+app.use("/api/products", productsRouter);
+app.use("/api/carts", cartsRouter);
+app.use("/", viewsRouter);
 
 // Passport Config
 initializePassport();
