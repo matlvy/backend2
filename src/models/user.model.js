@@ -7,13 +7,13 @@ const userSchema = new Schema({
   email: { type: String, required: true, unique: true },
   age: { type: Number, required: true },
   password: { type: String, required: true },
+  cart: { type: Schema.Types.ObjectId, ref: "Carts" },
   role: {
     type: String,
     required: true,
     enum: ["admin", "user"],
     default: "user",
   },
-  // cartId: { type: Schema.Types.ObjectId, ref: "cart" },
 });
 
 // Middleware de mongoose

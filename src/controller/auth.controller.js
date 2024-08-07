@@ -25,7 +25,8 @@ class AuthController {
   }
 
   async register(req, res) {
-    const { first_name, last_name, email, age, password, role } = req.body;
+    const { first_name, last_name, email, age, password, cart, role } =
+      req.body;
 
     if (!first_name || !last_name || !email || !age || !password) {
       return res.status(400).json({
@@ -48,6 +49,7 @@ class AuthController {
         email,
         age,
         password,
+        cart,
         role,
       });
 
