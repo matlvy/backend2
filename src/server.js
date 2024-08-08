@@ -1,6 +1,5 @@
 import express from "express";
 import exphbs from "express-handlebars";
-import "./database.js";
 import productsRouter from "./routes/products.router.js";
 import cartsRouter from "./routes/carts.router.js";
 import viewsRouter from "./routes/views.router.js";
