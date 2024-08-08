@@ -26,10 +26,11 @@ app.engine("handlebars", exphbs.engine());
 app.set("view engine", "handlebars");
 app.set("views", "./src/views");
 
-//Rutas:
+// Routes config
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 app.use("/", viewsRouter);
+app.use("/api/auth", authRoutes);
 
 // Passport Config
 initializePassport();
@@ -40,9 +41,6 @@ mongoose
   .connect("mongodb://localhost:27017/preentrega1")
   .then(() => console.log("MongoDB connected"))
   .catch((error) => console.log(error));
-
-// Routes config
-app.use("/api/auth", authRoutes);
 
 // Start server
 app.listen(PORT, () => {
