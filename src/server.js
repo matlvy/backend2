@@ -1,6 +1,6 @@
 import express from "express";
-import wordRouter from "./routes/word.router.js";
-import petRouter from "./routes/pet.router.js";
+import { userRouter } from "./routes/user.routes.js";
+import { authRouter } from "./routes/auth.routes.js";
 
 const app = express();
 const PORT = 5000;
@@ -8,6 +8,8 @@ const PORT = 5000;
 app.use(express.json());
 
 // Routes
+app.use("/api/auth", authRouter.getRouter());
+app.use("/api/users", userRouter.getRouter());
 app.use("*", (req, res) => {
   res.status(404).json({ message: "Page not found" });
 });
