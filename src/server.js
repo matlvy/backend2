@@ -8,8 +8,6 @@ const PORT = 5000;
 app.use(express.json());
 
 // Routes
-app.use("/api/dictionary", wordRouter);
-app.use("/api/pets", petRouter);
 app.use("*", (req, res) => {
   res.status(404).json({ message: "Page not found" });
 });
