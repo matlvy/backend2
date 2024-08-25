@@ -1,32 +1,47 @@
 import express from "express";
-import cors from "cors";
-import routes from "./routes/index.js";
+import mongoose from "mongoose";
 import morgan from "morgan";
-import { connectDB } from "./config/connect.js";
+import passport from "passport";
+import { initializePassport } from "./config/passport.config.js";
+import routes from "./routes/index.js";
 import { config } from "./config/config.js";
+import { errorHandler } from "./middlewares/error.middleware.js";
 
 const app = express();
+const PORT = 5000;
 
 // Express config
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT"],
-  })
-);
 app.use(morgan("dev"));
 
-// Mongoose config
-connectDB();
+// Passport config
+initializePassport();
+app.use(passport.initialize());
+
+// Mongo config
+mongoose
+  .connect(config.MONGO_URI)
+  .then(() => {
+    console.log("Conectado a MongoDB");
+  })
+  .catch((error) => {
+    console.log(error);
+  });
 
 // Routes
 app.use("/api", routes);
 
-// Start server
-const port = config.PORT;
+app.use(errorHandler);
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.use("*", (req, res) => {
+  res.status(404).json({
+    message: "Página no encontrada",
+    error: "Not found",
+  });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });

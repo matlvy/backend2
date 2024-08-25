@@ -1,12 +1,23 @@
-import { Router } from "express";
+import {
+  authenticate,
+  authorizations,
+} from "../middlewares/authorization.middleware.js";
+import authRoutes from "./auth.routes.js";
+import cartRoutes from "./cart.routes.js";
+import productRoutes from "./products.routes.js";
 import userRoutes from "./user.routes.js";
-import businessRoutes from "./business.routes.js";
-import orderRoutes from "./order.routes.js";
+import { Router } from "express";
 
 const router = Router();
 
-router.use("/users", userRoutes);
-router.use("/business", businessRoutes);
-router.use("/orders", orderRoutes);
+router.use("/auth", authRoutes);
+router.use("/cart", authenticate("jwt"), authorizations(["user"]), cartRoutes);
+router.use("/products", productRoutes);
+router.use(
+  "/users",
+  authenticate("jwt"),
+  authorizations(["admin"]),
+  userRoutes
+);
 
 export default router;
