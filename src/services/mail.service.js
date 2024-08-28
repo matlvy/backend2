@@ -8,7 +8,6 @@ class MailService {
       port: config.mailer.port,
       auth: config.mailer.auth,
     });
-    this.from = "emi.perez997@gmail.com";
   }
 
   getMessageTemplate(type, mail) {
