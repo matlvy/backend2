@@ -1,12 +1,10 @@
 import { Router } from "express";
-import { UserController } from "../controller/user.controller.js";
-import { authorizations } from "../middlewares/authorization.middleware.js";
+import { UserController } from "../controllers/user.controller.js";
 
 const router = Router();
 
 router.get("/", UserController.getAll);
-router.get("/:id", UserController.getById);
-router.delete("/:id", UserController.delete);
-router.put("/:id", UserController.update);
+router.post("/", UserController.create);
+router.get("/activate/:code", UserController.activate);
 
 export default router;
