@@ -21,7 +21,7 @@ class MailService {
         
         <p style="font-size: 16px; color: red">Si tienes alguna pregunta, no dudes en contactarnos.</p>
         
-        <img src="cid:gatito.jpg" alt="gatito" style="width: 100px; height: 100px; border-radius: 50%;">
+        
 
         <a href="http://localhost:5000/api/users/activate/codigoSecreto" style="color: red; text-decoration: none;">Activar cuenta</a>
         `;
@@ -53,13 +53,7 @@ class MailService {
         to,
         subject,
         html,
-        attachments: [
-          {
-            filename: "gatito.jpg",
-            path: "./public/gatito.jpg",
-            cid: "gatito.jpg",
-          },
-        ],
+        attachments: [],
       });
       console.log(info);
     } catch (error) {

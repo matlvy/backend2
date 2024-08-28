@@ -1,5 +1,4 @@
 import { mailService } from "../services/mail.service.js";
-import { smsService } from "../services/sms.service.js";
 
 // DB
 const users = [];
@@ -27,29 +26,6 @@ export class UserController {
       type: "welcome",
     });
 
-    await smsService.sendMessage(
-      phone,
-      "Bienvenido a nuestro servicio de mensajes masivos"
-    );
-
     return res.status(201).json(user);
-  }
-
-  static async activate(req, res) {
-    const { code } = req.params;
-
-    if (code !== "codigoSecreto") {
-      return res.status(400).json({ error: "Invalid code" });
-    }
-
-    // Buscan al usuario
-    if (users[0].activate) {
-      return res.status(400).json({ error: "User already activated" });
-    }
-
-    // Lo activan si existe
-    users[0].activate = true;
-
-    return res.status(200).json(users[0]);
   }
 }
