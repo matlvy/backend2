@@ -6,6 +6,7 @@ import { initializePassport } from "./config/passport.config.js";
 import routes from "./routes/index.js";
 import { config } from "./config/config.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
+import userRoutes from "./routes/user.routes.js";
 
 const app = express();
 const PORT = 5000;
@@ -14,6 +15,7 @@ const PORT = 5000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+app.use("/api/users", userRoutes);
 
 // Passport config
 initializePassport();

@@ -1,0 +1,12 @@
+GET http://localhost:5000/api/users
+
+###
+
+POST http://localhost:5000/api/users
+Content-Type: application/json
+
+{
+  "name": "Recipient Email",
+  "email": "recipientemail@gmail.com",
+  "phone": "+541111111111"
+}
