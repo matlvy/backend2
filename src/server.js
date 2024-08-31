@@ -25,7 +25,7 @@ app.use(passport.initialize());
 mongoose
   .connect(config.MONGO_URI)
   .then(() => {
-    console.log("Conectado a MongoDB");
+    console.log("Connected to MongoDB");
   })
   .catch((error) => {
     console.log(error);
@@ -38,7 +38,7 @@ app.use(errorHandler);
 
 app.use("*", (req, res) => {
   res.status(404).json({
-    message: "Página no encontrada",
+    message: "Page not found",
     error: "Not found",
   });
 });
