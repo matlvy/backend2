@@ -148,7 +148,6 @@ export class CartController {
     }
   }
 
-  // Entrega final
   static async purchase(req, res) {
     try {
       const { id } = req.params;
