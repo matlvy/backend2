@@ -13,5 +13,6 @@ const router = Router();
 
 router.get("/", ticketController.getAll);
 router.get("/:id", ticketController.getById);
+router.get("/users/:userId", ticketController.getByUserId);
 
 export default router;
